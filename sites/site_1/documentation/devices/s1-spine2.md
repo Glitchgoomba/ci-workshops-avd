@@ -286,15 +286,10 @@ vlan 4094
 | Ethernet4 | S1-LEAF3_Ethernet3 | *trunk | *20 | *- | *- | 4 |
 | Ethernet5 | S1-LEAF4_Ethernet3 | *trunk | *20 | *- | *- | 4 |
 | Ethernet6 | MLAG_PEER_s1-spine1_Ethernet6 | *trunk | *- | *- | *['LEAF_PEER_L3', 'MLAG'] | 1 |
+| Ethernet9 | S1-LEAF5_Ethernet3 | *trunk | *10,20 | *- | *- | 9 |
+| Ethernet10 | S1-LEAF6_Ethernet3 | *trunk | *10,20 | *- | *- | 9 |
 
 *Inherited from Port-Channel Interface
-
-##### IPv4
-
-| Interface | Description | Type | Channel Group | IP Address | VRF |  MTU | Shutdown | ACL In | ACL Out |
-| --------- | ----------- | -----| ------------- | ---------- | ----| ---- | -------- | ------ | ------- |
-| Ethernet7 | P2P_LINK_TO_WANCORE_Ethernet2 | routed | - | 10.0.0.31/31 | default | 1500 | False | - | - |
-| Ethernet8 | P2P_LINK_TO_WANCORE_Ethernet2 | routed | - | 10.0.0.35/31 | default | 1500 | False | - | - |
 
 #### Ethernet Interfaces Device Configuration
 
@@ -330,23 +325,15 @@ interface Ethernet6
    no shutdown
    channel-group 1 mode active
 !
-interface Ethernet7
-   description P2P_LINK_TO_WANCORE_Ethernet2
+interface Ethernet9
+   description S1-LEAF5_Ethernet3
    no shutdown
-   mtu 1500
-   no switchport
-   ip address 10.0.0.31/31
-   ip ospf network point-to-point
-   ip ospf area 0.0.0.0
+   channel-group 9 mode active
 !
-interface Ethernet8
-   description P2P_LINK_TO_WANCORE_Ethernet2
+interface Ethernet10
+   description S1-LEAF6_Ethernet3
    no shutdown
-   mtu 1500
-   no switchport
-   ip address 10.0.0.35/31
-   ip ospf network point-to-point
-   ip ospf area 0.0.0.0
+   channel-group 9 mode active
 ```
 
 ### Port-Channel Interfaces
@@ -360,6 +347,7 @@ interface Ethernet8
 | Port-Channel1 | MLAG_PEER_s1-spine1_Po1 | switched | trunk | - | - | ['LEAF_PEER_L3', 'MLAG'] | - | - | - | - |
 | Port-Channel2 | RACK1_Po2 | switched | trunk | 10 | - | - | - | - | 2 | - |
 | Port-Channel4 | RACK2_Po2 | switched | trunk | 20 | - | - | - | - | 4 | - |
+| Port-Channel9 | RACK3_Po2 | switched | trunk | 10,20 | - | - | - | - | 9 | - |
 
 #### Port-Channel Interfaces Device Configuration
 
@@ -388,6 +376,14 @@ interface Port-Channel4
    switchport trunk allowed vlan 20
    switchport mode trunk
    mlag 4
+!
+interface Port-Channel9
+   description RACK3_Po2
+   no shutdown
+   switchport
+   switchport trunk allowed vlan 10,20
+   switchport mode trunk
+   mlag 9
 ```
 
 ### Loopback Interfaces
@@ -538,7 +534,7 @@ ip route 0.0.0.0/0 192.168.0.1
 
 | Process ID | Router ID | Default Passive Interface | No Passive Interface | BFD | Max LSA | Default Information Originate | Log Adjacency Changes Detail | Auto Cost Reference Bandwidth | Maximum Paths | MPLS LDP Sync Default | Distribute List In |
 | ---------- | --------- | ------------------------- | -------------------- | --- | ------- | ----------------------------- | ---------------------------- | ----------------------------- | ------------- | --------------------- | ------------------ |
-| 100 | 10.1.252.2 | enabled | Vlan4093 <br> Ethernet7 <br> Ethernet8 <br> | disabled | 12000 | disabled | disabled | - | - | - | - |
+| 100 | 10.1.252.2 | enabled | Vlan4093 <br> | disabled | 12000 | disabled | disabled | - | - | - | - |
 
 #### Router OSPF Router Redistribution
 
@@ -550,8 +546,6 @@ ip route 0.0.0.0/0 192.168.0.1
 
 | Interface | Area | Cost | Point To Point |
 | -------- | -------- | -------- | -------- |
-| Ethernet7 | 0.0.0.0 | - | True |
-| Ethernet8 | 0.0.0.0 | - | True |
 | Vlan4093 | 0.0.0.0 | - | True |
 | Loopback0 | 0.0.0.0 | - | - |
 
@@ -563,8 +557,6 @@ router ospf 100
    router-id 10.1.252.2
    passive-interface default
    no passive-interface Vlan4093
-   no passive-interface Ethernet7
-   no passive-interface Ethernet8
    max-lsa 12000
    redistribute connected
 ```

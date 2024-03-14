@@ -111,6 +111,13 @@ port_channel_interfaces:
   mode: trunk
   vlans: '20'
   mlag: 4
+- name: Port-Channel9
+  description: RACK3_Po2
+  type: switched
+  shutdown: false
+  mode: trunk
+  vlans: 10,20
+  mlag: 9
 ethernet_interfaces:
 - name: Ethernet1
   peer: s1-spine1
@@ -172,28 +179,26 @@ ethernet_interfaces:
   channel_group:
     id: 4
     mode: active
-- name: Ethernet7
-  peer: WANCORE
-  peer_interface: Ethernet2
-  peer_type: other
-  description: P2P_LINK_TO_WANCORE_Ethernet2
-  type: routed
+- name: Ethernet9
+  peer: s1-leaf5
+  peer_interface: Ethernet3
+  peer_type: leaf
+  description: S1-LEAF5_Ethernet3
   shutdown: false
-  mtu: 1500
-  ip_address: 10.0.0.31/31
-  ospf_network_point_to_point: true
-  ospf_area: 0.0.0.0
-- name: Ethernet8
-  peer: WANCORE
-  peer_interface: Ethernet2
-  peer_type: other
-  description: P2P_LINK_TO_WANCORE_Ethernet2
-  type: routed
+  type: port-channel-member
+  channel_group:
+    id: 9
+    mode: active
+- name: Ethernet10
+  peer: s1-leaf6
+  peer_interface: Ethernet3
+  peer_type: leaf
+  description: S1-LEAF6_Ethernet3
   shutdown: false
-  mtu: 1500
-  ip_address: 10.0.0.35/31
-  ospf_network_point_to_point: true
-  ospf_area: 0.0.0.0
+  type: port-channel-member
+  channel_group:
+    id: 9
+    mode: active
 mlag_configuration:
   domain_id: SPINES
   local_interface: Vlan4094
@@ -215,8 +220,6 @@ router_ospf:
     max_lsa: 12000
     no_passive_interfaces:
     - Vlan4093
-    - Ethernet7
-    - Ethernet8
     bfd_enable: false
     redistribute:
       connected: {}
